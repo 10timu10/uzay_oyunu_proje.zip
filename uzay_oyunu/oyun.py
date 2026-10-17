@@ -2,10 +2,12 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
+from uzay_oyunu.akis import yakit_gostergesi
 from uzay_oyunu.araclar import hamle_sayaci
 
 VARSAYILAN_DOSYA = Path(__file__).parent / "galaksi.json"
-YOLCULUK_YAKITI = 10
+# Her yolculukta göstergeden düşen yakıt (yakit_gostergesi tüketimi)
+YOLCULUK_YAKITI = 5
 # Hangi gezegende hangi eşya bulunur
 GEZEGEN_ESYALARI = {
     "centauri": "credits",
@@ -76,7 +78,7 @@ def travel(
     girdi: Callable[[str], str] = input,
     yazdir: Callable[[str], None] = print,
 ) -> int:
-    """Oyunu oynatır; kara_delik'e ulaşınca ya da yakıt bitince durur.
+    """Oyunu oynatır; kara_delik'e ulaşınca ya da yakıt göstergesi bitince durur.
 
     girdi ve yazdir parametreleri testte sahte fonksiyon verebilmek içindir.
     Toplam hamle sayısını döndürür.
@@ -86,8 +88,10 @@ def travel(
     envanter = {"credits": False, "engines": False, "copilot": False}
     konum = galaksi["konum"]
     yakit = galaksi["yakit"]
+    # Üreteç: her next() çağrısı yakıtı YOLCULUK_YAKITI kadar azaltıp kalanı verir
+    gosterge = yakit_gostergesi(galaksi["yakit"], YOLCULUK_YAKITI)
 
-    while konum != "kara_delik" and yakit >= YOLCULUK_YAKITI:
+    while konum != "kara_delik":
         hedefler = galaksi["baglantilar"][konum]
         yazdir(f"Konum: {konum} | Yakıt: {yakit}")
         metin = envanter_metni(**envanter)
@@ -100,16 +104,18 @@ def travel(
             yazdir("Geçersiz seçim, tekrar dene.")
             continue
 
+        try:
+            yakit = next(gosterge)
+        except StopIteration:
+            yazdir("Yakıtın bitti, uzayda sürükleniyorsun…")
+            return hamle
+
         konum = hedefler[int(secim) - 1]
-        yakit -= YOLCULUK_YAKITI
         hamle = sayac()
         if konum in GEZEGEN_ESYALARI:
             envanter[GEZEGEN_ESYALARI[konum]] = True
 
-    if konum == "kara_delik":
-        yazdir(f"Oyunu {hamle} hamlede bitirdin!")
-    else:
-        yazdir("Yakıtın bitti, oyun sona erdi.")
+    yazdir(f"Oyunu {hamle} hamlede bitirdin!")
     return hamle
 
 

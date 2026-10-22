@@ -37,9 +37,9 @@ yerine bir sarmalayıcı koyar (`f = d(f)`). Sarmalayıcının gövdesi ise fonk
 - **Uygulama:** `akis.olc_dekoratorlu` önbelleksiz rota sayacını sarmalar (adim=20):
 
 ```
-rota_sayisi: 2.5882 sn
+rota_sayisi: 1.0066 sn
 ```
-<!-- bu süre geliştirme ortamında ölçüldü; kendi makinende `uv run python -m uzay_oyunu.akis` ile ölçüp güncelle -->
+
 - **Testler:** sonuç değişmeden dönüyor, adlı argümanlarla çağrı çalışıyor, `__name__`/`__doc__` korunuyor.
 
 ## Görev 2 – Çağrı sayacı ve dekoratör sırası (`say`)

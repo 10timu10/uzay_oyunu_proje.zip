@@ -1,6 +1,6 @@
-import time
-from functools import wraps
 from typing import Any, Callable, Dict, List
+
+from uzay_oyunu.dekoratorler import sure_olc  # Hafta 5: dekoratör artık orada
 
 
 def hamle_sayaci() -> Callable[[], int]:
@@ -22,19 +22,6 @@ def en_bagli_gezegenler(galaksi: Dict[str, Any]) -> List[str]:
         galaksi["gezegenler"],
         key=lambda g: (-len(baglantilar.get(g, [])), g),
     )
-
-
-def sure_olc(fonksiyon: Callable) -> Callable:
-    """Verilen fonksiyonu çalıştırıp süresini yazan bir sarmalayıcı döndürür."""
-
-    @wraps(fonksiyon)
-    def sarmalayici(*args: Any, **kwargs: Any) -> Any:
-        baslangic = time.perf_counter()
-        sonuc = fonksiyon(*args, **kwargs)
-        print(f"[{fonksiyon.__name__}] {time.perf_counter() - baslangic:.6f} sn")
-        return sonuc
-
-    return sarmalayici
 
 
 if __name__ == "__main__":

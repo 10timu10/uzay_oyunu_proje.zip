@@ -4,6 +4,8 @@ from typing import Any, Callable, Dict, List
 
 from uzay_oyunu.akis import yakit_gostergesi
 from uzay_oyunu.araclar import hamle_sayaci
+from uzay_oyunu.dekoratorler import log_cagri, sinirla
+from uzay_oyunu.komutlar import komut_calistir, komut_mu
 
 VARSAYILAN_DOSYA = Path(__file__).parent / "galaksi.json"
 # Her yolculukta göstergeden düşen yakıt (yakit_gostergesi tüketimi)
@@ -37,10 +39,16 @@ def envanter_metni(credits: bool, engines: bool, copilot: bool) -> str:
     return f"Sende: {', '.join(esyalar)}"
 
 
+@log_cagri
 def hedef_menusu(hedefler: List[str]) -> str:
     """Gidilebilecek hedeflerin numaralandırılmış menü metnini döndürür.
 
+    @log_cagri çağrıyı ve dönüş değerini de yazdırdığı için doctest çıktısında
+    önce log satırları, sonra dönüş değeri görünür.
+
     >>> hedef_menusu(["centauri", "sirius"])
+    -> hedef_menusu(['centauri', 'sirius'])
+    <- hedef_menusu = 'Nereye gitmek istersin?\\n[1] centauri\\n[2] sirius'
     'Nereye gitmek istersin?\\n[1] centauri\\n[2] sirius'
     """
     satirlar = ["Nereye gitmek istersin?"]
@@ -49,6 +57,7 @@ def hedef_menusu(hedefler: List[str]) -> str:
     return "\n".join(satirlar)
 
 
+@log_cagri
 def galaksi_kur(
     gezegenler: List[str],
     baglantilar: Dict[str, List[str]],
@@ -64,6 +73,12 @@ def galaksi_kur(
         "konum": baslangic,
         "yakit": kwargs.get("yakit", 50),
     }
+
+
+@sinirla(0, 100)
+def yakit_harca(miktar: int) -> int:
+    """Depodan `miktar` yakıt harcar, 100 üzerinden kalanı döndürür (0-100 dışı hata)."""
+    return 100 - miktar
 
 
 def galaksiyi_yukle(dosya_yolu: Path | str = VARSAYILAN_DOSYA) -> Dict[str, Any]:
@@ -100,6 +115,10 @@ def travel(
         yazdir(hedef_menusu(hedefler))
 
         secim = girdi("> ").strip()
+        if komut_mu(secim):
+            durum = {"konum": konum, "baglantilar": galaksi["baglantilar"], **envanter}
+            yazdir(komut_calistir(secim, durum))
+            continue  # hamle/yakıt harcanmaz; döngü başında aynı menü tekrar gösterilir
         if not secim.isdigit() or not 1 <= int(secim) <= len(hedefler):
             yazdir("Geçersiz seçim, tekrar dene.")
             continue

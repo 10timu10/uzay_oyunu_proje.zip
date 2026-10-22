@@ -5,6 +5,8 @@ import time
 from collections.abc import Callable, Iterable, Iterator
 from functools import lru_cache
 
+from uzay_oyunu.dekoratorler import sure_olc
+
 Kayit = tuple[str, str, int]  # (kaynak, hedef, yakıt)
 
 
@@ -94,7 +96,14 @@ def olc(baglantilar: dict[str, list[str]], gezegen: str = "dünya", adim: int = 
     print(onbellekli.cache_info())
 
 
+def olc_dekoratorlu(baglantilar: dict[str, list[str]], gezegen: str = "dünya", adim: int = 20) -> int:
+    """Hafta 5 Görev 1: önbelleksiz sayaca @sure_olc uygulayıp süreyi yazdırır."""
+    olculen = sure_olc(rota_sayaci_onbelleksiz(baglantilar))
+    return olculen(gezegen, adim)
+
+
 if __name__ == "__main__":
     from uzay_oyunu.oyun import galaksiyi_yukle
 
     olc(galaksiyi_yukle()["baglantilar"], "dünya", 20)
+    olc_dekoratorlu(galaksiyi_yukle()["baglantilar"], "dünya", 20)
